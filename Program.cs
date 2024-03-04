@@ -1,6 +1,8 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Google.Protobuf.WellKnownTypes;
+using Microsoft.AspNetCore.Http;
 
 internal class Program
 {
@@ -12,6 +14,7 @@ internal class Program
             {
                 services.AddApplicationInsightsTelemetryWorkerService();
                 services.ConfigureFunctionsApplicationInsights();
+                services.AddSingleton<IMyService, MyService>();
             })
             .Build();
 
@@ -50,6 +53,14 @@ public class MyService : IMyService
         var myService = _serviceProvider?.GetRequiredService<IHttpClientFactory>();
 
         var myClient = myService.CreateClient();
+
+        var msg = new HttpRequestMessage()
+        {
+            RequestUri = new Uri("https://www.bing.com"),
+            Method = HttpMethod.Get
+        };
+
+        myClient.Send(msg);
 
         System.Console.WriteLine("Hello from MyServiceMethod()!");
     }
